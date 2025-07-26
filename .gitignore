@@ -100,9 +100,8 @@ tickets.json
 warnings.json
 user_data.json
 
-# PM2
+# Process managers
 .pm2/
-ecosystem.config.js.bak
 
 # OS generated files
 .DS_Store
