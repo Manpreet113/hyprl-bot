@@ -21,7 +21,7 @@ module.exports = {
         // Check if the bot can send messages in the target channel
         if (!channel.permissionsFor(interaction.client.user).has('SendMessages')) {
             return await interaction.reply({
-                content: '❌ I don\\'t have permission to send messages in that channel!',
+                content: '❌ I don\'t have permission to send messages in that channel!',
                 ephemeral: true
             });
         }
