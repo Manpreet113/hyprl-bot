@@ -35,6 +35,21 @@ module.exports = {
                     name: '📋 **Project Commands**', 
                     value: '`/project status` - Check project status\n`/project update` - Send project update\n`/project changelog` - Show recent changes', 
                     inline: false 
+                },
+                { 
+                    name: '🤖 **AI Documentation Assistant**', 
+                    value: '`/ask` - Ask AI about HyprL documentation\n`/topics` - Show available topics\n`/learn` - Teach AI new info (admin only)', 
+                    inline: false 
+                },
+                { 
+                    name: '🎲 **Fun Commands**', 
+                    value: '`/8ball` - Magic 8-ball predictions\n`/roll` - Roll a dice\n`/coinflip` - Flip a coin\n`/calculate` - Math calculator', 
+                    inline: false 
+                },
+                { 
+                    name: '🌐 **Server Management**', 
+                    value: '`/serverinfo` - Server information\n`/role` - Manage roles\n`/say` - Make bot say something\n`/slowmode` - Set channel slowmode', 
+                    inline: false 
                 }
             )
             .setTimestamp()
