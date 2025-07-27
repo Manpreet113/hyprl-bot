@@ -9,8 +9,8 @@ module.exports = {
         console.log(`👥 Watching ${client.users.cache.size} user(s)`);
         
         // Set bot activity
-        client.user.setActivity(`${process.env.PROJECT_NAME || 'HyprL'} Support`, { 
-            type: ActivityType.Watching 
+        client.user.setActivity(`Reading ${process.env.PROJECT_NAME || 'HyprL'} docs`, { 
+            type: ActivityType.Reading
         });
     },
 };
