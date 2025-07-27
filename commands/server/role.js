@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -96,7 +96,7 @@ module.exports = {
             console.error('Error creating role:', error);
             await interaction.reply({
                 content: '❌ Failed to create role. Make sure I have the proper permissions!',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
     },
@@ -107,7 +107,7 @@ module.exports = {
         if (!role.editable) {
             return await interaction.reply({
                 content: '❌ I cannot delete this role! It may be higher than my role.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -126,7 +126,7 @@ module.exports = {
             console.error('Error deleting role:', error);
             await interaction.reply({
                 content: '❌ Failed to delete role!',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
     },
@@ -139,14 +139,14 @@ module.exports = {
         if (!member) {
             return await interaction.reply({
                 content: '❌ User not found in this server!',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
         if (member.roles.cache.has(role.id)) {
             return await interaction.reply({
                 content: `❌ ${user.tag} already has the ${role.name} role!`,
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -165,7 +165,7 @@ module.exports = {
             console.error('Error giving role:', error);
             await interaction.reply({
                 content: '❌ Failed to give role!',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
     },
@@ -178,14 +178,14 @@ module.exports = {
         if (!member) {
             return await interaction.reply({
                 content: '❌ User not found in this server!',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
         if (!member.roles.cache.has(role.id)) {
             return await interaction.reply({
                 content: `❌ ${user.tag} doesn't have the ${role.name} role!`,
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -204,7 +204,7 @@ module.exports = {
             console.error('Error removing role:', error);
             await interaction.reply({
                 content: '❌ Failed to remove role!',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
     }

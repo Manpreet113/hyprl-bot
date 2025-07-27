@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, MessageFlags } = require('discord.js');
 
 class ValidationUtils {
     // Sanitize text input to prevent XSS and injection attacks
@@ -86,29 +86,39 @@ class ValidationUtils {
     }
 
     // Create standardized error embed
-    static createErrorEmbed(title, description, ephemeral = true) {
-        return {
+    static createErrorEmbed(title, description, isEphemeral = true) {
+        const response = {
             embeds: [new EmbedBuilder()
                 .setColor('#ff0000')
                 .setTitle(`❌ ${title}`)
                 .setDescription(description)
                 .setTimestamp()
-            ],
-            ephemeral
+            ]
         };
+        
+        if (isEphemeral) {
+            response.flags = MessageFlags.Ephemeral;
+        }
+        
+        return response;
     }
 
     // Create standardized success embed
-    static createSuccessEmbed(title, description, ephemeral = false) {
-        return {
+    static createSuccessEmbed(title, description, isEphemeral = false) {
+        const response = {
             embeds: [new EmbedBuilder()
                 .setColor('#00ff00')
                 .setTitle(`✅ ${title}`)
                 .setDescription(description)
                 .setTimestamp()
-            ],
-            ephemeral
+            ]
         };
+        
+        if (isEphemeral) {
+            response.flags = MessageFlags.Ephemeral;
+        }
+        
+        return response;
     }
 
     // Validate Discord mention patterns

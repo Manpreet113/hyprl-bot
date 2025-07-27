@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const aiHandler = require('../../handlers/ai/aiHandler');
 
 module.exports = {
@@ -24,7 +24,7 @@ module.exports = {
         if (interaction.user.id !== process.env.OWNER_ID) {
             return await interaction.reply({
                 content: '❌ Only the bot owner can teach new information!',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -35,7 +35,7 @@ module.exports = {
         // Parse keywords
         const keywords = keywordsStr.split(',').map(k => k.trim().toLowerCase());
         
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
         
         try {
             const success = await aiHandler.updateKnowledgeBase(topic, keywords, content);

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const database = require('../../utils/database');
 const logger = require('../../utils/logger');
 
@@ -60,7 +60,7 @@ module.exports = {
             
             await interaction.editReply({
                 content: '❌ An error occurred while fetching statistics.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
     },

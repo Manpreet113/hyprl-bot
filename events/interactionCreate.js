@@ -16,7 +16,7 @@ module.exports = {
                 console.error('Error executing command:', error);
                 const errorMessage = { 
                     content: '❌ There was an error while executing this command!', 
-                    ephemeral: true 
+                    flags: MessageFlags.Ephemeral 
                 };
                 
                 if (interaction.replied || interaction.deferred) {

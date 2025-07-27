@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, MessageFlags } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -22,7 +22,7 @@ module.exports = {
         if (!channel.permissionsFor(interaction.client.user).has(PermissionsBitField.Flags.SendMessages)) {
             return await interaction.reply({
                 content: '❌ I don\'t have permission to send messages in that channel!',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -32,12 +32,12 @@ module.exports = {
             if (channel.id !== interaction.channel.id) {
                 await interaction.reply({
                     content: `✅ Message sent to ${channel}!`,
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
             } else {
                 await interaction.reply({
                     content: '✅ Message sent!',
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
             }
 
@@ -45,7 +45,7 @@ module.exports = {
             console.error('Error sending message:', error);
             await interaction.reply({
                 content: '❌ Failed to send message!',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
     },

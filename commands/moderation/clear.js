@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -20,7 +20,7 @@ module.exports = {
         const amount = interaction.options.getInteger('amount');
         const target = interaction.options.getUser('target');
         
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
         
         try {
             const messages = await interaction.channel.messages.fetch({ limit: amount });

@@ -1,4 +1,4 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 const { createAudioPlayer, createAudioResource, joinVoiceChannel, AudioPlayerStatus, VoiceConnectionStatus } = require('@discordjs/voice');
 const ytdl = require('ytdl-core');
 const { spawn } = require('child_process');
@@ -324,40 +324,40 @@ module.exports = {
         switch (customId) {
             case 'music_pause':
                 if (musicManager.pause(guildId)) {
-                    await interaction.reply({ content: '⏸️ Music paused!', ephemeral: true });
+                    await interaction.reply({ content: '⏸️ Music paused!', flags: MessageFlags.Ephemeral });
                 } else {
-                    await interaction.reply({ content: '❌ Nothing to pause!', ephemeral: true });
+                    await interaction.reply({ content: '❌ Nothing to pause!', flags: MessageFlags.Ephemeral });
                 }
                 break;
 
             case 'music_resume':
                 if (musicManager.resume(guildId)) {
-                    await interaction.reply({ content: '▶️ Music resumed!', ephemeral: true });
+                    await interaction.reply({ content: '▶️ Music resumed!', flags: MessageFlags.Ephemeral });
                 } else {
-                    await interaction.reply({ content: '❌ Nothing to resume!', ephemeral: true });
+                    await interaction.reply({ content: '❌ Nothing to resume!', flags: MessageFlags.Ephemeral });
                 }
                 break;
 
             case 'music_skip':
                 if (musicManager.skip(guildId)) {
-                    await interaction.reply({ content: '⏭️ Song skipped!', ephemeral: true });
+                    await interaction.reply({ content: '⏭️ Song skipped!', flags: MessageFlags.Ephemeral });
                 } else {
-                    await interaction.reply({ content: '❌ Nothing to skip!', ephemeral: true });
+                    await interaction.reply({ content: '❌ Nothing to skip!', flags: MessageFlags.Ephemeral });
                 }
                 break;
 
             case 'music_queue':
                 const queueEmbed = musicManager.createQueueEmbed(guildId);
-                await interaction.reply({ embeds: [queueEmbed], ephemeral: true });
+                await interaction.reply({ embeds: [queueEmbed], flags: MessageFlags.Ephemeral });
                 break;
 
             case 'music_stop':
                 musicManager.leaveVoiceChannel(guildId);
-                await interaction.reply({ content: '⏹️ Music stopped and left voice channel!', ephemeral: true });
+                await interaction.reply({ content: '⏹️ Music stopped and left voice channel!', flags: MessageFlags.Ephemeral });
                 break;
 
             default:
-                await interaction.reply({ content: '❌ Unknown music control!', ephemeral: true });
+                await interaction.reply({ content: '❌ Unknown music control!', flags: MessageFlags.Ephemeral });
         }
     }
 };

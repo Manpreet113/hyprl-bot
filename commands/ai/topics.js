@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const aiHandler = require('../../handlers/ai/aiHandler');
 
 module.exports = {
@@ -14,7 +14,7 @@ module.exports = {
             if (!knowledgeBase || !knowledgeBase.topics) {
                 return await interaction.reply({
                     content: '❌ Knowledge base not available!',
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
             }
 
@@ -56,7 +56,7 @@ module.exports = {
             console.error('Error in topics command:', error);
             await interaction.reply({
                 content: '❌ An error occurred while fetching topics.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
     },

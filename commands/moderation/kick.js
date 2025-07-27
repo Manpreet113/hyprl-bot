@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -23,7 +23,7 @@ module.exports = {
         if (!member) {
             return await interaction.reply({ 
                 content: '❌ User not found in this server!', 
-                ephemeral: true 
+                flags: MessageFlags.Ephemeral 
             });
         }
         
@@ -31,7 +31,7 @@ module.exports = {
         if (!member.kickable) {
             return await interaction.reply({ 
                 content: '❌ I cannot kick this user! They may have higher permissions than me.', 
-                ephemeral: true 
+                flags: MessageFlags.Ephemeral 
             });
         }
         
@@ -39,7 +39,7 @@ module.exports = {
         if (target.id === interaction.user.id) {
             return await interaction.reply({ 
                 content: '❌ You cannot kick yourself!', 
-                ephemeral: true 
+                flags: MessageFlags.Ephemeral 
             });
         }
         
@@ -47,7 +47,7 @@ module.exports = {
         if (target.id === interaction.client.user.id) {
             return await interaction.reply({ 
                 content: '❌ I cannot kick myself!', 
-                ephemeral: true 
+                flags: MessageFlags.Ephemeral 
             });
         }
         
@@ -98,7 +98,7 @@ module.exports = {
             console.error('Error kicking member:', error);
             await interaction.reply({ 
                 content: '❌ An error occurred while trying to kick the member!', 
-                ephemeral: true 
+                flags: MessageFlags.Ephemeral 
             });
         }
     },

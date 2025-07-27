@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { musicManager } = require('../../handlers/musicHandler');
 
 module.exports = {
@@ -15,7 +15,7 @@ module.exports = {
         if (!interaction.member.voice.channel) {
             return await interaction.reply({
                 content: '❌ You need to be in a voice channel to play music!',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -24,7 +24,7 @@ module.exports = {
         if (!permissions.has('Connect') || !permissions.has('Speak')) {
             return await interaction.reply({
                 content: '❌ I need permissions to join and speak in your voice channel!',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -16,7 +16,7 @@ module.exports = {
         if (!/^[0-9+\-*/().\s]+$/.test(expression)) {
             return await interaction.reply({
                 content: '❌ Invalid expression! Only use numbers and basic operators (+, -, *, /, parentheses).',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -44,7 +44,7 @@ module.exports = {
             console.error('Calculation error:', error);
             await interaction.reply({
                 content: '❌ Invalid mathematical expression! Please check your syntax.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
     },

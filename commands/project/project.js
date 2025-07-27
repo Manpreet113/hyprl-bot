@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const fs = require('fs-extra');
 const path = require('path');
 const { exec } = require('child_process');
@@ -137,7 +137,7 @@ module.exports = {
         if (!isOwner && !hasAdminRole) {
             return await interaction.reply({
                 content: '❌ You don\'t have permission to send project updates!',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -147,7 +147,7 @@ module.exports = {
         if (!updateChannelId) {
             return await interaction.reply({
                 content: '❌ Update channel not configured!',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -155,7 +155,7 @@ module.exports = {
         if (!updateChannel) {
             return await interaction.reply({
                 content: '❌ Update channel not found!',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -175,14 +175,14 @@ module.exports = {
             
             await interaction.reply({
                 content: `✅ Project update sent to ${updateChannel}!`,
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             
         } catch (error) {
             console.error('Error sending project update:', error);
             await interaction.reply({
                 content: '❌ Error sending project update!',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
     },

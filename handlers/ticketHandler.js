@@ -1,4 +1,4 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, PermissionFlagsBits } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, PermissionFlagsBits, MessageFlags, ThreadAutoArchiveDuration } = require('discord.js');
 const fs = require('fs-extra');
 const path = require('path');
 
@@ -44,11 +44,11 @@ module.exports = {
         if (existingTicket) {
             return await interaction.reply({
                 content: `❌ You already have an open ticket: <#${existingTicket.channelId}>`,
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
         
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
         
         try {
             // Get ticket category
@@ -61,7 +61,7 @@ module.exports = {
             
             // Create ticket channel
             const ticketChannel = await guild.channels.create({
-                name: `ticket-${member.user.username}-${Date.now().toString().slice(-4)}`,
+                name: `${member.user.username}'s support ticket`,
                 type: ChannelType.GuildText,
                 parent: category,
                 permissionOverwrites: [
@@ -159,7 +159,7 @@ module.exports = {
         if (!ticket) {
             return await interaction.reply({
                 content: '❌ This is not a valid ticket channel!',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
         
@@ -172,7 +172,7 @@ module.exports = {
         if (!isTicketOwner && !hasModerationPerms) {
             return await interaction.reply({
                 content: '❌ You do not have permission to close this ticket!',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
         

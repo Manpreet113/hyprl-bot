@@ -1,4 +1,4 @@
-const { EmbedBuilder, WebhookClient } = require('discord.js');
+const { EmbedBuilder, WebhookClient, MessageFlags } = require('discord.js');
 const logger = require('./logger');
 
 class ErrorHandler {
@@ -74,7 +74,7 @@ class ErrorHandler {
             if (interaction.deferred || interaction.replied) {
                 await interaction.editReply({ embeds: [errorEmbed] });
             } else {
-                await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
+                await interaction.reply({ embeds: [errorEmbed], flags: MessageFlags.Ephemeral });
             }
         } catch (replyError) {
             logger.error('Failed to send error message to user', { 

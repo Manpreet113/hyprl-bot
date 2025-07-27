@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -13,7 +13,7 @@ module.exports = {
             .addFields(
                 { 
                     name: '📚 **Utility Commands**', 
-                    value: '`/docs` - Get documentation links\n`/help` - Show this help message\n`/ping` - Check bot latency\n`/info` - Show bot information', 
+                    value: '`/docs` - Get documentation links\n`/help` - Show this help message\n`/ping` - Check bot latency\n`/info` - Show bot information\n`/stats` - View bot analytics', 
                     inline: false 
                 },
                 { 
@@ -55,6 +55,6 @@ module.exports = {
             .setTimestamp()
             .setFooter({ text: `${process.env.PROJECT_NAME || 'HyprL'} Support Bot` });
 
-        await interaction.reply({ embeds: [embed], ephemeral: true });
+        await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     },
 };

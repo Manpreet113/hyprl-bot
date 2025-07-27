@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -30,7 +30,7 @@ module.exports = {
         if (target.id === interaction.user.id) {
             return await interaction.reply({ 
                 content: '❌ You cannot ban yourself!', 
-                ephemeral: true 
+                flags: MessageFlags.Ephemeral 
             });
         }
         
@@ -38,7 +38,7 @@ module.exports = {
         if (target.id === interaction.client.user.id) {
             return await interaction.reply({ 
                 content: '❌ I cannot ban myself!', 
-                ephemeral: true 
+                flags: MessageFlags.Ephemeral 
             });
         }
         
@@ -46,7 +46,7 @@ module.exports = {
         if (member && !member.bannable) {
             return await interaction.reply({ 
                 content: '❌ I cannot ban this user! They may have higher permissions than me.', 
-                ephemeral: true 
+                flags: MessageFlags.Ephemeral 
             });
         }
         
@@ -103,7 +103,7 @@ module.exports = {
             console.error('Error banning member:', error);
             await interaction.reply({ 
                 content: '❌ An error occurred while trying to ban the member!', 
-                ephemeral: true 
+                flags: MessageFlags.Ephemeral 
             });
         }
     },

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -18,7 +18,7 @@ module.exports = {
         if (interaction.user.id !== process.env.OWNER_ID) {
             return await interaction.reply({
                 content: '❌ Only the bot owner can use this command!',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 

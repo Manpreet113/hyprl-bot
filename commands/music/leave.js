@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { musicManager } = require('../../handlers/musicHandler');
 
 module.exports = {
@@ -12,7 +12,7 @@ module.exports = {
         if (!musicManager.connections.has(guildId)) {
             return await interaction.reply({
                 content: '❌ I\'m not connected to any voice channel!',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -21,7 +21,7 @@ module.exports = {
         if (botChannel && interaction.member.voice.channel?.id !== botChannel.id) {
             return await interaction.reply({
                 content: '❌ You need to be in the same voice channel as me to use this command!',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 

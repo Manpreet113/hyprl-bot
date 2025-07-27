@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { musicManager } = require('../../handlers/musicHandler');
 
 module.exports = {
@@ -13,7 +13,7 @@ module.exports = {
         if (!queue.currentSong && queue.songs.length === 0) {
             return await interaction.reply({
                 content: '📋 The music queue is empty! Use `/play` to add some songs.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 

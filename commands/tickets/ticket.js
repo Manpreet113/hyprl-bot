@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const ticketHandler = require('../../handlers/ticketHandler');
 
 module.exports = {
@@ -27,7 +27,7 @@ module.exports = {
                 if (!interaction.member.permissions.has(PermissionFlagsBits.ManageChannels)) {
                     return await interaction.reply({
                         content: '❌ You need the "Manage Channels" permission to setup the ticket system!',
-                        ephemeral: true
+                        flags: MessageFlags.Ephemeral
                     });
                 }
                 await ticketHandler.setupTicketSystem(interaction);
@@ -44,7 +44,7 @@ module.exports = {
             default:
                 await interaction.reply({
                     content: '❌ Invalid subcommand!',
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
         }
     },
