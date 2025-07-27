@@ -43,7 +43,7 @@ module.exports = {
             const links = [
                 `[📖 Documentation](${process.env.DOCS_URL})`,
                 `[💻 Repository](${process.env.PROJECT_URL})`,
-                `[🎫 Create Ticket](/ticket create)`
+                '[🎫 Create Ticket](/ticket create)'
             ].join(' | ');
             
             embed.addFields({ name: '🔗 Helpful Links', value: links, inline: false });

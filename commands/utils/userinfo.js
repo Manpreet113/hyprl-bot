@@ -34,7 +34,7 @@ module.exports = {
 
         const embed = new EmbedBuilder()
             .setColor(member?.displayHexColor || '#0099ff')
-            .setTitle(`👤 User Information`)
+            .setTitle('👤 User Information')
             .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 256 }))
             .addFields(
                 { name: '🏷️ Tag', value: user.tag, inline: true },
@@ -64,7 +64,7 @@ module.exports = {
         }
 
         embed.setTimestamp()
-             .setFooter({ text: `Requested by ${interaction.user.username}`, iconURL: interaction.user.displayAvatarURL() });
+            .setFooter({ text: `Requested by ${interaction.user.username}`, iconURL: interaction.user.displayAvatarURL() });
 
         await interaction.reply({ embeds: [embed] });
     },

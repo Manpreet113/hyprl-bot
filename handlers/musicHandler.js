@@ -313,14 +313,14 @@ class MusicManager {
 
     // Get the best quality thumbnail
     getBestThumbnail(thumbnails) {
-        if (!thumbnails || !Array.isArray(thumbnails)) return null;
+        if (!thumbnails || !Array.isArray(thumbnails)) {return null;}
         
         // Try to get the highest quality thumbnail
         const qualityOrder = ['maxresdefault', 'hqdefault', 'mqdefault', 'default'];
         
         for (const quality of qualityOrder) {
             const thumb = thumbnails.find(t => t.url && t.url.includes(quality));
-            if (thumb) return thumb.url;
+            if (thumb) {return thumb.url;}
         }
         
         // Fallback to first available thumbnail
@@ -329,7 +329,7 @@ class MusicManager {
 
     // Format view count
     formatViews(viewCount) {
-        if (!viewCount) return 'Unknown';
+        if (!viewCount) {return 'Unknown';}
         const count = parseInt(viewCount);
         if (count >= 1000000) {
             return `${(count / 1000000).toFixed(1)}M`;
@@ -451,42 +451,42 @@ module.exports = {
         const queue = musicManager.getQueue(guildId);
 
         switch (customId) {
-            case 'music_pause':
-                if (musicManager.pause(guildId)) {
-                    await interaction.reply({ content: '⏸️ Music paused!', flags: MessageFlags.Ephemeral });
-                } else {
-                    await interaction.reply({ content: '❌ Nothing to pause!', flags: MessageFlags.Ephemeral });
-                }
-                break;
+        case 'music_pause':
+            if (musicManager.pause(guildId)) {
+                await interaction.reply({ content: '⏸️ Music paused!', flags: MessageFlags.Ephemeral });
+            } else {
+                await interaction.reply({ content: '❌ Nothing to pause!', flags: MessageFlags.Ephemeral });
+            }
+            break;
 
-            case 'music_resume':
-                if (musicManager.resume(guildId)) {
-                    await interaction.reply({ content: '▶️ Music resumed!', flags: MessageFlags.Ephemeral });
-                } else {
-                    await interaction.reply({ content: '❌ Nothing to resume!', flags: MessageFlags.Ephemeral });
-                }
-                break;
+        case 'music_resume':
+            if (musicManager.resume(guildId)) {
+                await interaction.reply({ content: '▶️ Music resumed!', flags: MessageFlags.Ephemeral });
+            } else {
+                await interaction.reply({ content: '❌ Nothing to resume!', flags: MessageFlags.Ephemeral });
+            }
+            break;
 
-            case 'music_skip':
-                if (musicManager.skip(guildId)) {
-                    await interaction.reply({ content: '⏭️ Song skipped!', flags: MessageFlags.Ephemeral });
-                } else {
-                    await interaction.reply({ content: '❌ Nothing to skip!', flags: MessageFlags.Ephemeral });
-                }
-                break;
+        case 'music_skip':
+            if (musicManager.skip(guildId)) {
+                await interaction.reply({ content: '⏭️ Song skipped!', flags: MessageFlags.Ephemeral });
+            } else {
+                await interaction.reply({ content: '❌ Nothing to skip!', flags: MessageFlags.Ephemeral });
+            }
+            break;
 
-            case 'music_queue':
-                const queueEmbed = musicManager.createQueueEmbed(guildId);
-                await interaction.reply({ embeds: [queueEmbed], flags: MessageFlags.Ephemeral });
-                break;
+        case 'music_queue':
+            const queueEmbed = musicManager.createQueueEmbed(guildId);
+            await interaction.reply({ embeds: [queueEmbed], flags: MessageFlags.Ephemeral });
+            break;
 
-            case 'music_stop':
-                musicManager.leaveVoiceChannel(guildId);
-                await interaction.reply({ content: '⏹️ Music stopped and left voice channel!', flags: MessageFlags.Ephemeral });
-                break;
+        case 'music_stop':
+            musicManager.leaveVoiceChannel(guildId);
+            await interaction.reply({ content: '⏹️ Music stopped and left voice channel!', flags: MessageFlags.Ephemeral });
+            break;
 
-            default:
-                await interaction.reply({ content: '❌ Unknown music control!', flags: MessageFlags.Ephemeral });
+        default:
+            await interaction.reply({ content: '❌ Unknown music control!', flags: MessageFlags.Ephemeral });
         }
     }
 };

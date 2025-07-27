@@ -3,7 +3,7 @@ const { EmbedBuilder, MessageFlags } = require('discord.js');
 class ValidationUtils {
     // Sanitize text input to prevent XSS and injection attacks
     static sanitizeText(text, maxLength = 2000) {
-        if (!text || typeof text !== 'string') return '';
+        if (!text || typeof text !== 'string') {return '';}
         
         return text
             .trim()
@@ -77,10 +77,10 @@ class ValidationUtils {
 
     // Check if user has required permissions
     static hasPermission(member, requiredPermissions) {
-        if (!member || !requiredPermissions) return false;
+        if (!member || !requiredPermissions) {return false;}
         
         // Bot owner always has permission
-        if (member.id === process.env.OWNER_ID) return true;
+        if (member.id === process.env.OWNER_ID) {return true;}
         
         return member.permissions.has(requiredPermissions);
     }

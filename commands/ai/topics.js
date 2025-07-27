@@ -21,7 +21,7 @@ module.exports = {
             const embed = new EmbedBuilder()
                 .setColor('#0099ff')
                 .setTitle(`📚 ${knowledgeBase.project.name} Documentation Topics`)
-                .setDescription(`Available topics you can ask about using \`/ask\`:`)
+                .setDescription('Available topics you can ask about using `/ask`:')
                 .setTimestamp()
                 .setFooter({ text: `${process.env.PROJECT_NAME || 'HyprL'} AI Assistant` });
 
@@ -40,7 +40,7 @@ module.exports = {
             // Add helpful information
             embed.addFields({
                 name: '💡 How to Use',
-                value: `• Use \`/ask <question>\` to get AI-powered answers\\n• Keywords help the AI find relevant information\\n• Example: \`/ask how to install hyprl\``,
+                value: '• Use `/ask <question>` to get AI-powered answers\\n• Keywords help the AI find relevant information\\n• Example: `/ask how to install hyprl`',
                 inline: false
             });
 

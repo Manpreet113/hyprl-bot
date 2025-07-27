@@ -96,7 +96,7 @@ class ErrorHandler {
 
     // Send error alerts to webhook or log channel
     async sendErrorAlert(type, error, context = {}) {
-        if (!this.errorWebhook) return;
+        if (!this.errorWebhook) {return;}
 
         const embed = new EmbedBuilder()
             .setColor('#ff0000')

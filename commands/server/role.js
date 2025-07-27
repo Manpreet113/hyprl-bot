@@ -54,18 +54,18 @@ module.exports = {
         const subcommand = interaction.options.getSubcommand();
         
         switch (subcommand) {
-            case 'create':
-                await this.createRole(interaction);
-                break;
-            case 'delete':
-                await this.deleteRole(interaction);
-                break;
-            case 'give':
-                await this.giveRole(interaction);
-                break;
-            case 'remove':
-                await this.removeRole(interaction);
-                break;
+        case 'create':
+            await this.createRole(interaction);
+            break;
+        case 'delete':
+            await this.deleteRole(interaction);
+            break;
+        case 'give':
+            await this.giveRole(interaction);
+            break;
+        case 'remove':
+            await this.removeRole(interaction);
+            break;
         }
     },
 

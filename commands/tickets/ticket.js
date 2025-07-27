@@ -22,30 +22,30 @@ module.exports = {
         const subcommand = interaction.options.getSubcommand();
         
         switch (subcommand) {
-            case 'setup':
-                // Check permissions for setup
-                if (!interaction.member.permissions.has(PermissionFlagsBits.ManageChannels)) {
-                    return await interaction.reply({
-                        content: '❌ You need the "Manage Channels" permission to setup the ticket system!',
-                        flags: MessageFlags.Ephemeral
-                    });
-                }
-                await ticketHandler.setupTicketSystem(interaction);
-                break;
-                
-            case 'close':
-                await ticketHandler.closeTicket(interaction);
-                break;
-                
-            case 'create':
-                await ticketHandler.createTicket(interaction);
-                break;
-                
-            default:
-                await interaction.reply({
-                    content: '❌ Invalid subcommand!',
+        case 'setup':
+            // Check permissions for setup
+            if (!interaction.member.permissions.has(PermissionFlagsBits.ManageChannels)) {
+                return await interaction.reply({
+                    content: '❌ You need the "Manage Channels" permission to setup the ticket system!',
                     flags: MessageFlags.Ephemeral
                 });
+            }
+            await ticketHandler.setupTicketSystem(interaction);
+            break;
+                
+        case 'close':
+            await ticketHandler.closeTicket(interaction);
+            break;
+                
+        case 'create':
+            await ticketHandler.createTicket(interaction);
+            break;
+                
+        default:
+            await interaction.reply({
+                content: '❌ Invalid subcommand!',
+                flags: MessageFlags.Ephemeral
+            });
         }
     },
 };

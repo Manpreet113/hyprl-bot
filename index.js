@@ -7,6 +7,8 @@ require('dotenv').config();
 // Load keep-alive service for Render
 require('./keep-alive');
 
+const automod = require('./utils/automod');
+
 // Create a new client instance with comprehensive intents
 const client = new Client({ 
     intents: [
@@ -17,6 +19,10 @@ const client = new Client({
         GatewayIntentBits.GuildMembers,
         GatewayIntentBits.GuildModeration
     ] 
+});
+
+client.on('messageCreate', async message => {
+    await automod.processMessage(message);
 });
 
 // Initialize command collection

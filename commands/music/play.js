@@ -34,7 +34,7 @@ module.exports = {
 
         try {
             // Check if it's a YouTube URL
-            let url = query;
+            const url = query;
             if (!query.includes('youtube.com') && !query.includes('youtu.be')) {
                 // For now, require YouTube URLs. Later we can add search functionality
                 return await interaction.editReply({

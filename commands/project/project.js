@@ -31,15 +31,15 @@ module.exports = {
         const subcommand = interaction.options.getSubcommand();
         
         switch (subcommand) {
-            case 'status':
-                await this.handleStatus(interaction);
-                break;
-            case 'changelog':
-                await this.handleChangelog(interaction);
-                break;
-            case 'update':
-                await this.handleUpdate(interaction);
-                break;
+        case 'status':
+            await this.handleStatus(interaction);
+            break;
+        case 'changelog':
+            await this.handleChangelog(interaction);
+            break;
+        case 'update':
+            await this.handleUpdate(interaction);
+            break;
         }
     },
 

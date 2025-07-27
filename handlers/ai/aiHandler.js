@@ -18,31 +18,31 @@ class AIDocumentationHandler {
                 // Create default knowledge base
                 this.knowledgeBase = {
                     project: {
-                        name: process.env.PROJECT_NAME || "HyprL",
-                        description: "A modern, fast, and customizable window manager for Linux",
-                        repository: process.env.PROJECT_URL || "https://github.com/Manpeet113/hyprL",
-                        documentation: process.env.DOCS_URL || "https://hyprl-docs.vercel.app"
+                        name: process.env.PROJECT_NAME || 'HyprL',
+                        description: 'A modern, fast, and customizable window manager for Linux',
+                        repository: process.env.PROJECT_URL || 'https://github.com/Manpeet113/hyprL',
+                        documentation: process.env.DOCS_URL || 'https://hyprl-docs.vercel.app'
                     },
                     topics: {
-                        "installation": {
-                            keywords: ["install", "setup", "build", "compile", "dependencies"],
-                            content: "To install HyprL, you can either build from source or use a package manager. Check the installation guide in our documentation for detailed steps."
+                        'installation': {
+                            keywords: ['install', 'setup', 'build', 'compile', 'dependencies'],
+                            content: 'To install HyprL, you can either build from source or use a package manager. Check the installation guide in our documentation for detailed steps.'
                         },
-                        "configuration": {
-                            keywords: ["config", "settings", "customize", "keybinds", "rules"],
-                            content: "HyprL uses a configuration file located at ~/.config/hyprl/hyprl.conf. You can customize keybindings, window rules, animations, and more."
+                        'configuration': {
+                            keywords: ['config', 'settings', 'customize', 'keybinds', 'rules'],
+                            content: 'HyprL uses a configuration file located at ~/.config/hyprl/hyprl.conf. You can customize keybindings, window rules, animations, and more.'
                         },
-                        "troubleshooting": {
-                            keywords: ["error", "crash", "bug", "fix", "problem", "issue"],
-                            content: "Common issues include graphics driver problems, configuration syntax errors, and missing dependencies. Check our troubleshooting guide for solutions."
+                        'troubleshooting': {
+                            keywords: ['error', 'crash', 'bug', 'fix', 'problem', 'issue'],
+                            content: 'Common issues include graphics driver problems, configuration syntax errors, and missing dependencies. Check our troubleshooting guide for solutions.'
                         },
-                        "features": {
-                            keywords: ["features", "capabilities", "what can", "supports"],
-                            content: "HyprL supports dynamic tiling, animations, multiple monitors, workspaces, window rules, plugins, and much more. It's designed for performance and customization."
+                        'features': {
+                            keywords: ['features', 'capabilities', 'what can', 'supports'],
+                            content: 'HyprL supports dynamic tiling, animations, multiple monitors, workspaces, window rules, plugins, and much more. It\'s designed for performance and customization.'
                         },
-                        "keybindings": {
-                            keywords: ["shortcuts", "keys", "binds", "hotkeys", "controls"],
-                            content: "Default keybindings include Super+Enter for terminal, Super+Q to close windows, Super+number for workspaces. All keybindings are fully customizable."
+                        'keybindings': {
+                            keywords: ['shortcuts', 'keys', 'binds', 'hotkeys', 'controls'],
+                            content: 'Default keybindings include Super+Enter for terminal, Super+Q to close windows, Super+number for workspaces. All keybindings are fully customizable.'
                         }
                     }
                 };
@@ -142,7 +142,7 @@ class AIDocumentationHandler {
             context += `Description: ${this.knowledgeBase.project.description}\\n\\n`;
             
             if (relevantTopics.length > 0) {
-                context += "Relevant information:\\n";
+                context += 'Relevant information:\\n';
                 relevantTopics.forEach(topic => {
                     context += `- ${topic.name}: ${topic.content}\\n`;
                 });

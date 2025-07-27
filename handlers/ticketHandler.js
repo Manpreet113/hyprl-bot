@@ -87,7 +87,7 @@ module.exports = {
             if (process.env.OWNER_ID) {
                 try {
                     const owner = await guild.members.fetch(process.env.OWNER_ID);
-                    if (owner) membersToAdd.push(owner);
+                    if (owner) {membersToAdd.push(owner);}
                 } catch (e) { /* Owner not in guild */ }
             }
             
