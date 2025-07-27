@@ -38,7 +38,7 @@ module.exports = {
         // Check if user already has an open ticket
         const ticketData = await ensureTicketData();
         const existingTicket = Object.values(ticketData).find(ticket => 
-            ticket.userId === member.id && ticket.status === 'open'
+            ticket.userId === member.id && ticket.status === 'open' && guild.channels.cache.has(ticket.channelId)
         );
         
         if (existingTicket) {
@@ -51,64 +51,89 @@ module.exports = {
         await interaction.deferReply({ flags: MessageFlags.Ephemeral });
         
         try {
-            // Get ticket category
-            const category = guild.channels.cache.get(process.env.TICKET_CATEGORY_ID);
-            if (!category) {
+            // Find a suitable channel to create the thread in
+            let parentChannel = guild.channels.cache.get(process.env.TICKET_PARENT_CHANNEL_ID);
+            
+            // If no parent channel is configured, use the current channel
+            if (!parentChannel) {
+                parentChannel = interaction.channel;
+            }
+            
+            // Ensure the parent channel supports threads
+            if (parentChannel.type !== ChannelType.GuildText && parentChannel.type !== ChannelType.GuildAnnouncement) {
                 return await interaction.editReply({
-                    content: '❌ Ticket category not found! Please contact an administrator.',
+                    content: '❌ Cannot create ticket thread. Please configure a proper text channel for tickets.'
                 });
             }
             
-            // Create ticket channel
-            const ticketChannel = await guild.channels.create({
-                name: `${member.user.username}'s support ticket`,
-                type: ChannelType.GuildText,
-                parent: category,
-                permissionOverwrites: [
-                    {
-                        id: guild.roles.everyone,
-                        deny: [PermissionFlagsBits.ViewChannel],
-                    },
-                    {
-                        id: member.id,
-                        allow: [
-                            PermissionFlagsBits.ViewChannel,
-                            PermissionFlagsBits.SendMessages,
-                            PermissionFlagsBits.ReadMessageHistory,
-                        ],
-                    },
-                    {
-                        id: interaction.client.user.id,
-                        allow: [
-                            PermissionFlagsBits.ViewChannel,
-                            PermissionFlagsBits.SendMessages,
-                            PermissionFlagsBits.ManageChannels,
-                        ],
-                    },
-                ],
+            // Create private thread
+            const ticketThread = await parentChannel.threads.create({
+                name: `🎫 ${member.user.username}'s Support Ticket`,
+                type: ChannelType.PrivateThread,
+                autoArchiveDuration: ThreadAutoArchiveDuration.OneWeek,
+                reason: `Support ticket created by ${member.user.tag}`
             });
             
-            // Add moderator role permissions if configured
-            if (process.env.MOD_ROLE_ID) {
-                await ticketChannel.permissionOverwrites.create(process.env.MOD_ROLE_ID, {
-                    ViewChannel: true,
-                    SendMessages: true,
-                    ReadMessageHistory: true,
-                });
+            // Add the user to the thread
+            await ticketThread.members.add(member.id);
+            
+            // Add bot to thread
+            await ticketThread.members.add(interaction.client.user.id);
+            
+            // Add moderators and admins to thread
+            const membersToAdd = [];
+            
+            // Add owner if configured
+            if (process.env.OWNER_ID) {
+                try {
+                    const owner = await guild.members.fetch(process.env.OWNER_ID);
+                    if (owner) membersToAdd.push(owner);
+                } catch (e) { /* Owner not in guild */ }
             }
             
-            // Create ticket embed and controls
-            const ticketEmbed = new EmbedBuilder()
-                .setColor('#0099ff')
-                .setTitle('🎫 Support Ticket')
-                .setDescription(`Hello ${member}! Please describe your issue and a staff member will assist you shortly.`)
-                .addFields(
-                    { name: '📋 Ticket Information', value: `**Created by:** ${member.user.tag}\n**Created at:** <t:${Math.floor(Date.now() / 1000)}:F>`, inline: false },
-                    { name: '❓ Need Help?', value: 'Please provide as much detail as possible about your issue.', inline: false }
-                )
-                .setTimestamp()
-                .setFooter({ text: `${process.env.PROJECT_NAME || 'HyprL'} Support` });
+            // Add members with mod role
+            if (process.env.MOD_ROLE_ID) {
+                const modRole = guild.roles.cache.get(process.env.MOD_ROLE_ID);
+                if (modRole) {
+                    modRole.members.forEach(modMember => {
+                        if (!membersToAdd.includes(modMember)) {
+                            membersToAdd.push(modMember);
+                        }
+                    });
+                }
+            }
             
+            // Add members with admin role
+            if (process.env.ADMIN_ROLE_ID) {
+                const adminRole = guild.roles.cache.get(process.env.ADMIN_ROLE_ID);
+                if (adminRole) {
+                    adminRole.members.forEach(adminMember => {
+                        if (!membersToAdd.includes(adminMember)) {
+                            membersToAdd.push(adminMember);
+                        }
+                    });
+                }
+            }
+            
+            // Add members with ManageChannels permission
+            guild.members.cache.forEach(guildMember => {
+                if (guildMember.permissions.has(PermissionFlagsBits.ManageChannels) && 
+                    !membersToAdd.includes(guildMember) && 
+                    !guildMember.user.bot) {
+                    membersToAdd.push(guildMember);
+                }
+            });
+            
+            // Add all authorized members to the thread
+            for (const memberToAdd of membersToAdd.slice(0, 10)) { // Discord limit
+                try {
+                    await ticketThread.members.add(memberToAdd.id);
+                } catch (e) {
+                    console.log(`Couldn't add ${memberToAdd.user.tag} to ticket thread`);
+                }
+            }
+            
+            // Create close button embed at the top
             const closeButton = new ActionRowBuilder()
                 .addComponents(
                     new ButtonBuilder()
@@ -118,30 +143,49 @@ module.exports = {
                         .setEmoji('🔒')
                 );
             
-            await ticketChannel.send({
-                content: `${member} Welcome to your support ticket!`,
-                embeds: [ticketEmbed],
+            // Send close button first
+            await ticketThread.send({
+                content: '**🎫 Ticket Controls**',
                 components: [closeButton]
+            });
+            
+            // Create main ticket embed
+            const ticketEmbed = new EmbedBuilder()
+                .setColor('#0099ff')
+                .setTitle('🎫 Support Ticket Created')
+                .setDescription(`Hello ${member}! Please describe your issue in detail and a staff member will assist you shortly.`)
+                .addFields(
+                    { name: '📋 Ticket Information', value: `**Created by:** ${member.user.tag}\n**Created at:** <t:${Math.floor(Date.now() / 1000)}:F>\n**Thread ID:** ${ticketThread.id}`, inline: false },
+                    { name: '❓ How to get help:', value: '• Provide a detailed description of your issue\n• Include steps you\'ve already tried\n• Add screenshots if applicable\n• Be patient - staff will respond soon!', inline: false },
+                    { name: '🔒 Closing this ticket', value: 'Click the "Close Ticket" button above when your issue is resolved, or staff will close it when appropriate.', inline: false }
+                )
+                .setTimestamp()
+                .setFooter({ text: `${process.env.PROJECT_NAME || 'HyprL'} Support` });
+            
+            await ticketThread.send({
+                content: `${member} **Welcome to your private support ticket!**\n\n👥 **Who can see this:** You, bot admins, moderators, and the server owner.`,
+                embeds: [ticketEmbed]
             });
             
             // Save ticket data
             const ticketId = `ticket_${Date.now()}`;
             ticketData[ticketId] = {
-                channelId: ticketChannel.id,
+                channelId: ticketThread.id,
                 userId: member.id,
                 createdAt: Date.now(),
-                status: 'open'
+                status: 'open',
+                type: 'thread'
             };
             await saveTicketData(ticketData);
             
             await interaction.editReply({
-                content: `✅ Ticket created successfully! Please check ${ticketChannel}`,
+                content: `✅ Private support ticket created! Check ${ticketThread} 🎫`,
             });
             
         } catch (error) {
-            console.error('Error creating ticket:', error);
+            console.error('Error creating ticket thread:', error);
             await interaction.editReply({
-                content: '❌ An error occurred while creating your ticket. Please try again later.',
+                content: `❌ Failed to create ticket: ${error.message}. Please contact an administrator.`
             });
         }
     },

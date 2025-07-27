@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, MessageFlags, PermissionFlagsBits } = require('discord.js');
 const { musicManager } = require('../../handlers/musicHandler');
 
 module.exports = {
@@ -21,7 +21,7 @@ module.exports = {
 
         // Check if bot has permissions to join and speak in the voice channel
         const permissions = interaction.member.voice.channel.permissionsFor(interaction.client.user);
-        if (!permissions.has('Connect') || !permissions.has('Speak')) {
+        if (!permissions.has(PermissionFlagsBits.Connect) || !permissions.has(PermissionFlagsBits.Speak)) {
             return await interaction.reply({
                 content: '❌ I need permissions to join and speak in your voice channel!',
                 flags: MessageFlags.Ephemeral
