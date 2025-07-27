@@ -5,8 +5,13 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "node index.js",
-    "test": "node index.js"
+    "dev": "NODE_ENV=development node index.js",
+    "prod": "NODE_ENV=production node index.js",
+    "test": "node index.js",
+    "lint": "echo 'Linting not configured yet'",
+    "clean": "rm -rf logs/* data/*.db",
+    "backup": "mkdir -p backups && cp -r data/ backups/data-$(date +%Y%m%d-%H%M%S)",
+    "install:clean": "rm -rf node_modules package-lock.json && npm install"
   },
   "keywords": [
     "discord",
@@ -28,6 +33,16 @@
     "fs-extra": "^11.3.0",
     "node-cron": "^4.2.1",
     "play-dl": "^1.9.7",
+    "sqlite3": "^5.1.7",
     "ytdl-core": "^4.11.5"
+  },
+  "overrides": {
+    "glob": "^9.3.5",
+    "rimraf": "^4.4.1",
+    "inflight": "npm:@npmcli/promise-spawn@^7.0.1",
+    "are-we-there-yet": "npm:@npmcli/arborist@^7.5.4",
+    "gauge": "npm:@npmcli/arborist@^7.5.4",
+    "npmlog": "npm:@npmcli/arborist@^7.5.4",
+    "@npmcli/move-file": "npm:@npmcli/fs@^3.1.1"
   }
 }

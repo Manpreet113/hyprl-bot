@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ChannelType } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -17,9 +17,9 @@ module.exports = {
         
         // Count channels by type
         const channels = guild.channels.cache;
-        const textChannels = channels.filter(channel => channel.type === 0).size;
-        const voiceChannels = channels.filter(channel => channel.type === 2).size;
-        const categories = channels.filter(channel => channel.type === 4).size;
+        const textChannels = channels.filter(channel => channel.type === ChannelType.GuildText).size;
+        const voiceChannels = channels.filter(channel => channel.type === ChannelType.GuildVoice).size;
+        const categories = channels.filter(channel => channel.type === ChannelType.GuildCategory).size;
         
         // Server features
         const features = guild.features.length > 0 ? guild.features.map(feature => 

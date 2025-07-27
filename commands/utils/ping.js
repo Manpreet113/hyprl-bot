@@ -6,7 +6,7 @@ module.exports = {
         .setDescription('Check bot latency and API response time'),
     
     async execute(interaction) {
-        const sent = await interaction.reply({ content: '🏓 Pinging...', fetchReply: true });
+        const sent = await interaction.reply({ content: '🏓 Pinging...' }).withResponse();
         
         const embed = new EmbedBuilder()
             .setColor('#ffff00')

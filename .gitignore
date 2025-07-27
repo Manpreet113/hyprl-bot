@@ -100,6 +100,15 @@ tickets.json
 warnings.json
 user_data.json
 
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+data/*.db
+
+# Backups
+backups/
+
 # Process managers
 .pm2/
 

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, ChannelType } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -21,7 +21,7 @@ module.exports = {
         const channel = interaction.options.getChannel('channel') || interaction.channel;
         
         // Check if channel is a text channel
-        if (channel.type !== 0) {
+        if (channel.type !== ChannelType.GuildText) {
             return await interaction.reply({
                 content: '❌ Slowmode can only be set on text channels!',
                 ephemeral: true

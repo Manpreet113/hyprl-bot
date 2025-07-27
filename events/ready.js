@@ -1,3 +1,5 @@
+const { ActivityType } = require('discord.js');
+
 module.exports = {
     name: 'ready',
     once: true,
@@ -8,7 +10,7 @@ module.exports = {
         
         // Set bot activity
         client.user.setActivity(`${process.env.PROJECT_NAME || 'HyprL'} Support`, { 
-            type: 'WATCHING' 
+            type: ActivityType.Watching 
         });
     },
 };

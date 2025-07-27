@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -19,7 +19,7 @@ module.exports = {
         const channel = interaction.options.getChannel('channel') || interaction.channel;
         
         // Check if the bot can send messages in the target channel
-        if (!channel.permissionsFor(interaction.client.user).has('SendMessages')) {
+        if (!channel.permissionsFor(interaction.client.user).has(PermissionsBitField.Flags.SendMessages)) {
             return await interaction.reply({
                 content: '❌ I don\'t have permission to send messages in that channel!',
                 ephemeral: true
