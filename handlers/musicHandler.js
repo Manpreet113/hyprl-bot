@@ -1,6 +1,7 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 const { createAudioPlayer, createAudioResource, joinVoiceChannel, AudioPlayerStatus, VoiceConnectionStatus } = require('@discordjs/voice');
 const ytdl = require('ytdl-core');
+const ytdlDistube = require('@distube/ytdl-core');
 const { spawn } = require('child_process');
 
 class MusicManager {
@@ -199,21 +200,149 @@ class MusicManager {
         return false;
     }
 
-    // Get video info from YouTube URL
+    // Get video info from YouTube URL with multiple fallbacks
     async getVideoInfo(url) {
+        const logger = require('../utils/logger');
+        
         try {
-            const info = await ytdl.getInfo(url);
-            return {
-                title: info.videoDetails.title,
-                url: info.videoDetails.video_url,
-                duration: this.formatDuration(parseInt(info.videoDetails.lengthSeconds)),
-                thumbnail: info.videoDetails.thumbnails[0]?.url,
-                author: info.videoDetails.author.name,
-                views: parseInt(info.videoDetails.viewCount).toLocaleString()
-            };
+            // Validate YouTube URL format first
+            if (!this.isValidYouTubeUrl(url)) {
+                throw new Error('Invalid YouTube URL format');
+            }
+
+            logger.debug('Attempting to fetch video info', { url });
+
+            // Try multiple YouTube libraries in order of reliability
+            const libraries = [
+                { name: '@distube/ytdl-core', lib: ytdlDistube },
+                { name: 'ytdl-core', lib: ytdl }
+            ];
+
+            let lastError = null;
+            
+            for (const { name, lib } of libraries) {
+                try {
+                    logger.debug(`Trying ${name} library`);
+                    
+                    // Try to get video info with timeout
+                    const info = await Promise.race([
+                        lib.getInfo(url),
+                        new Promise((_, reject) => 
+                            setTimeout(() => reject(new Error(`${name} timeout`)), 15000)
+                        )
+                    ]);
+
+                    // Validate video details
+                    if (!info || !info.videoDetails) {
+                        throw new Error(`${name}: No video details found`);
+                    }
+
+                    const videoDetails = info.videoDetails;
+                    
+                    // Check if video is available
+                    if (!videoDetails.title || 
+                        videoDetails.title === '[Private video]' || 
+                        videoDetails.title === '[Deleted video]' ||
+                        videoDetails.title.includes('Private') ||
+                        videoDetails.title.includes('Deleted')) {
+                        throw new Error('Video is private, deleted, or unavailable');
+                    }
+
+                    // Check if video is too long (over 2 hours)
+                    const duration = parseInt(videoDetails.lengthSeconds || 0);
+                    if (duration > 7200) {
+                        throw new Error('Video is too long (max 2 hours)');
+                    }
+
+                    // Check if video is live stream
+                    if (videoDetails.isLiveContent && videoDetails.isLive) {
+                        throw new Error('Live streams are not supported');
+                    }
+
+                    const result = {
+                        title: videoDetails.title,
+                        url: videoDetails.video_url || url,
+                        duration: this.formatDuration(duration),
+                        thumbnail: this.getBestThumbnail(videoDetails.thumbnails),
+                        author: videoDetails.author?.name || videoDetails.ownerChannelName || 'Unknown',
+                        views: this.formatViews(videoDetails.viewCount),
+                        uploadDate: videoDetails.uploadDate || 'Unknown',
+                        description: videoDetails.shortDescription?.substring(0, 200) || 'No description',
+                        ageRestricted: videoDetails.age_restricted || false
+                    };
+
+                    logger.success(`Successfully fetched video info using ${name}`, { 
+                        title: result.title, 
+                        author: result.author,
+                        duration: result.duration 
+                    });
+
+                    return result;
+
+                } catch (error) {
+                    logger.warn(`${name} failed:`, error.message);
+                    lastError = error;
+                    continue; // Try next library
+                }
+            }
+
+            // If all libraries failed, throw the last error
+            throw lastError || new Error('All YouTube libraries failed');
+            
         } catch (error) {
-            throw new Error('Invalid YouTube URL or video unavailable');
+            logger.error('Error getting video info:', error);
+            
+            // Provide more specific error messages
+            if (error.message.includes('timeout')) {
+                throw new Error('Request timed out. YouTube might be experiencing issues.');
+            } else if (error.message.includes('private') || error.message.includes('deleted') || error.message.includes('unavailable')) {
+                throw new Error('This video is private, deleted, or unavailable.');
+            } else if (error.message.includes('too long')) {
+                throw new Error('Video is too long (maximum 2 hours allowed).');
+            } else if (error.message.includes('live')) {
+                throw new Error('Live streams are not supported.');
+            } else if (error.message.includes('format')) {
+                throw new Error('Invalid YouTube URL. Please provide a valid youtube.com or youtu.be link.');
+            } else if (error.message.includes('age')) {
+                throw new Error('Age-restricted videos are not supported.');
+            } else {
+                throw new Error(`Unable to fetch video: ${error.message}`);
+            }
         }
+    }
+
+    // Get the best quality thumbnail
+    getBestThumbnail(thumbnails) {
+        if (!thumbnails || !Array.isArray(thumbnails)) return null;
+        
+        // Try to get the highest quality thumbnail
+        const qualityOrder = ['maxresdefault', 'hqdefault', 'mqdefault', 'default'];
+        
+        for (const quality of qualityOrder) {
+            const thumb = thumbnails.find(t => t.url && t.url.includes(quality));
+            if (thumb) return thumb.url;
+        }
+        
+        // Fallback to first available thumbnail
+        return thumbnails[0]?.url || null;
+    }
+
+    // Format view count
+    formatViews(viewCount) {
+        if (!viewCount) return 'Unknown';
+        const count = parseInt(viewCount);
+        if (count >= 1000000) {
+            return `${(count / 1000000).toFixed(1)}M`;
+        } else if (count >= 1000) {
+            return `${(count / 1000).toFixed(1)}K`;
+        }
+        return count.toLocaleString();
+    }
+
+    // Validate YouTube URL format
+    isValidYouTubeUrl(url) {
+        const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/)([a-zA-Z0-9_-]{11})/;
+        return youtubeRegex.test(url);
     }
 
     // Format duration from seconds to MM:SS
