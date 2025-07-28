@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const automod = require('../../utils/automod');
 
 module.exports = {
@@ -46,12 +46,12 @@ module.exports = {
                         
                     await interaction.reply({
                         content: `✅ Added "${word}" to the blacklist.`,
-                        ephemeral: true
+flags: MessageFlags.Ephemeral
                     });
                 } else {
                     await interaction.reply({
                         content: `⚠️ "${word}" is already in the blacklist.`,
-                        ephemeral: true
+flags: MessageFlags.Ephemeral
                     });
                 }
                 break;
@@ -64,12 +64,12 @@ module.exports = {
                         
                     await interaction.reply({
                         content: `✅ Removed "${word}" from the blacklist.`,
-                        ephemeral: true
+flags: MessageFlags.Ephemeral
                     });
                 } else {
                     await interaction.reply({
                         content: `⚠️ "${word}" is not in the blacklist.`,
-                        ephemeral: true
+flags: MessageFlags.Ephemeral
                     });
                 }
                 break;
@@ -78,7 +78,7 @@ module.exports = {
                 if (config.blacklistedWords.words.length === 0) {
                     await interaction.reply({
                         content: '📋 No words are currently blacklisted.',
-                        ephemeral: true
+flags: MessageFlags.Ephemeral
                     });
                 } else {
                     const embed = new EmbedBuilder()
@@ -97,7 +97,7 @@ module.exports = {
 
                     await interaction.reply({
                         embeds: [embed],
-                        ephemeral: true
+flags: MessageFlags.Ephemeral
                     });
                 }
                 break;
@@ -109,7 +109,7 @@ module.exports = {
                     
                 await interaction.reply({
                     content: `✅ Cleared ${wordCount} words from the blacklist.`,
-                    ephemeral: true
+flags: MessageFlags.Ephemeral
                 });
                 break;
             }
@@ -118,7 +118,7 @@ module.exports = {
             console.error('Error in blacklist command:', error);
             await interaction.reply({
                 content: '❌ An error occurred while managing the blacklist. Please try again.',
-                ephemeral: true
+flags: MessageFlags.Ephemeral
             });
         }
     },

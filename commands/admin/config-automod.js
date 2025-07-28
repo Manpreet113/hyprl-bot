@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const automod = require('../../utils/automod');
 
 module.exports = {
@@ -28,7 +28,7 @@ module.exports = {
         ),
 
     async execute(interaction) {
-await interaction.deferReply({ ephemeral: true });
+await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const rule = interaction.options.getString('rule');
         const enable = interaction.options.getBoolean('enable');

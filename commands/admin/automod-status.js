@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
 const automod = require('../../utils/automod');
 const database = require('../../utils/database');
+const logger = require('../../utils/logger');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -13,7 +14,18 @@ module.exports = {
         .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
 
     async execute(interaction) {
-        await interaction.deferReply();
+try {
+            await interaction.deferReply();
+        } catch (e) {
+            if (e.code === 10062) { // Unknown Interaction
+                logger.warn('Interaction expired before defer, likely due to cold start. Aborting command.', {
+                    command: interaction.commandName,
+                    guildId: interaction.guild.id,
+                });
+                return;
+            }
+            throw e;
+        }
 
         try {
             const targetUser = interaction.options.getUser('user');
