@@ -6,6 +6,7 @@ const errorHandler = require('../utils/errorHandler');
 module.exports = {
     name: 'interactionCreate',
     async execute(interaction) {
+        console.log(`[DEBUG] New interaction received: ${interaction.type} | Command: ${interaction.commandName}`);
         // Ensure user and guild are in the database before anything else
         try {
             if (interaction.guild) {

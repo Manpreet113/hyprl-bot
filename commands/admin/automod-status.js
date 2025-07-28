@@ -14,6 +14,7 @@ module.exports = {
         .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
 
     async execute(interaction) {
+        console.log(`[DEBUG] Executing automod-status command.`);
 try {
             await interaction.deferReply();
         } catch (e) {
