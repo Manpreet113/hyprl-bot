@@ -106,35 +106,40 @@ module.exports = {
 
                 // Get recent violation statistics
                 try {
-                    const recentViolations = await database.pool.query(`
-                        SELECT 
-                            violation_type,
-                            COUNT(*) as count,
-                            AVG(CASE 
-                                WHEN violation_type = 'advanced_spam' THEN 5
-                                WHEN violation_type = 'phishing_link' THEN 4
-                                WHEN violation_type = 'suspicious_attachment' THEN 4
-                                WHEN violation_type = 'spam_frequency' THEN 3
-                                WHEN violation_type = 'excessive_role_mentions' THEN 3
-                                WHEN violation_type = 'blacklisted_words' THEN 2
-                                WHEN violation_type = 'zalgo_text' THEN 2
-                                ELSE 1
-                            END) as avg_severity
-                        FROM automod_violations 
-                        WHERE guild_id = $1 AND created_at >= NOW() - INTERVAL '24 hours'
-                        GROUP BY violation_type
-                        ORDER BY count DESC
-                        LIMIT 5
-                    `, [interaction.guild.id]);
+const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+                    const { data: recentViolations, error } = await database.supabase
+                        .from('automod_violations')
+                        .select('*')
+                        .eq('guild_id', interaction.guild.id)
+                        .gte('created_at', since);
 
-                    if (recentViolations.rows.length > 0) {
-                        const violationStats = recentViolations.rows
-                            .map(row => `• **${row.violation_type.replace('_', ' ')}**: ${row.count} (avg severity: ${parseFloat(row.avg_severity).toFixed(1)})`)
-                            .join('\\n');
-                        
+                    if (error) throw error;
+
+                    if (recentViolations.length > 0) {
+                        const violationStats = recentViolations
+                            .reduce((acc, row) => {
+                                if (!acc[row.violation_type]) {
+                                    acc[row.violation_type] = { count: 0, total_severity: 0 };
+                                }
+                                acc[row.violation_type].count++;
+                                acc[row.violation_type].total_severity += row.severity || 1;
+                                return acc;
+                            }, {});
+
+                        const sortedViolations = Object.entries(violationStats)
+                            .sort(([, a], [, b]) => b.count - a.count)
+                            .slice(0, 5);
+
+                        const violationText = sortedViolations
+                            .map(([type, stats]) => {
+                                const avgSeverity = (stats.total_severity / stats.count).toFixed(1);
+                                return `• **${type.replace(/_/g, ' ')}**: ${stats.count} (avg severity: ${avgSeverity})`;
+                            })
+                            .join('\n');
+
                         embed.addFields({
                             name: '📊 Top Violations (24h)',
-                            value: violationStats,
+                            value: violationText,
                             inline: false
                         });
                     } else {
