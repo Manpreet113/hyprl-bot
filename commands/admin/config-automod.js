@@ -28,6 +28,8 @@ module.exports = {
         ),
 
     async execute(interaction) {
+await interaction.deferReply({ ephemeral: true });
+
         const rule = interaction.options.getString('rule');
         const enable = interaction.options.getBoolean('enable');
 
@@ -40,23 +42,22 @@ module.exports = {
                 // Update the configuration
                 await automod.updateGuildConfig(interaction.guild.id, config);
 
-                await interaction.reply({
-                    content: `${rule.charAt(0).toUpperCase() + rule.slice(1)} rule is now ${enable ? 'enabled' : 'disabled'}.`,
-                    ephemeral: true
+                await interaction.editReply({
+                    content: `${rule.charAt(0).toUpperCase() + rule.slice(1)} rule is now ${enable ? 'enabled' : 'disabled'}.`
                 });
             } else {
                 // Report current rule status
-                await interaction.reply({
-                    content: `${rule.charAt(0).toUpperCase() + rule.slice(1)} rule is currently ${config[rule].enabled ? 'enabled' : 'disabled'}.`,
-                    ephemeral: true
+                await interaction.editReply({
+                    content: `${rule.charAt(0).toUpperCase() + rule.slice(1)} rule is currently ${config[rule].enabled ? 'enabled' : 'disabled'}.`
                 });
             }
         } catch (error) {
-            console.error('Error configuring automod:', error);
-            await interaction.reply({
-                content: 'An error occurred while configuring automod. Please try again.',
-                ephemeral: true
-            });
+            logger.error('Error configuring automod', { error });
+            if (!interaction.replied) {
+                await interaction.editReply({
+                    content: 'An error occurred while configuring automod. Please try again.'
+                });
+            }
         }
     },
 };

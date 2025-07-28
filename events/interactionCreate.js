@@ -53,7 +53,7 @@ module.exports = {
             if (interaction.isChatInputCommand()) {
                 await db.logCommand(interaction.commandName, interaction.user.id, interaction.guildId, null, false);
             }
-            errorHandler(error, interaction);
+await errorHandler.handleCommandError(error, interaction);
         }
     },
 };
