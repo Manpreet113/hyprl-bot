@@ -28,7 +28,7 @@ module.exports = {
         ),
 
     async execute(interaction) {
-await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const rule = interaction.options.getString('rule');
         const enable = interaction.options.getBoolean('enable');
@@ -43,21 +43,20 @@ await interaction.deferReply({ flags: MessageFlags.Ephemeral });
                 await automod.updateGuildConfig(interaction.guild.id, config);
 
                 await interaction.editReply({
-                    content: `${rule.charAt(0).toUpperCase() + rule.slice(1)} rule is now ${enable ? 'enabled' : 'disabled'}.`
+                    content: `✅ ${rule.charAt(0).toUpperCase() + rule.slice(1)} rule is now ${enable ? 'enabled' : 'disabled'}.`
                 });
             } else {
                 // Report current rule status
                 await interaction.editReply({
-                    content: `${rule.charAt(0).toUpperCase() + rule.slice(1)} rule is currently ${config[rule].enabled ? 'enabled' : 'disabled'}.`
+                    content: `📋 ${rule.charAt(0).toUpperCase() + rule.slice(1)} rule is currently ${config[rule].enabled ? 'enabled' : 'disabled'}.`
                 });
             }
         } catch (error) {
-            logger.error('Error configuring automod', { error });
-            if (!interaction.replied) {
-                await interaction.editReply({
-                    content: 'An error occurred while configuring automod. Please try again.'
-                });
-            }
+            logger.error('Error in config-automod command', { error });
+            // Since we deferred, we must use editReply or followUp
+            await interaction.editReply({
+                content: '❌ An error occurred while configuring automod. Please try again.'
+            });
         }
     },
 };
