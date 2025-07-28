@@ -1,8 +1,8 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
-const { createAudioPlayer, createAudioResource, joinVoiceChannel, AudioPlayerStatus, VoiceConnectionStatus } = require('@discordjs/voice');
+const { createAudioPlayer, createAudioResource, joinVoiceChannel, AudioPlayerStatus, VoiceConnectionStatus, generateDependencyReport } = require('@discordjs/voice');
 const ytdl = require('ytdl-core');
-const ytdlDistube = require('@distube/ytdl-core');
-const { spawn } = require('child_process');
+const playdl = require('play-dl');
+const logger = require('../utils/logger');
 
 class MusicManager {
     constructor() {
@@ -202,8 +202,6 @@ class MusicManager {
 
     // Get video info from YouTube URL with multiple fallbacks
     async getVideoInfo(url) {
-        const logger = require('../utils/logger');
-        
         try {
             // Validate YouTube URL format first
             if (!this.isValidYouTubeUrl(url)) {
@@ -212,49 +210,82 @@ class MusicManager {
 
             logger.debug('Attempting to fetch video info', { url });
 
-            // Try multiple YouTube libraries in order of reliability
-            const libraries = [
-                { name: '@distube/ytdl-core', lib: ytdlDistube },
-                { name: 'ytdl-core', lib: ytdl }
-            ];
+            // Try play-dl first (most reliable)
+            try {
+                const info = await playdl.video_info(url);
+                
+                if (!info || !info.video_details) {
+                    throw new Error('No video details found');
+                }
 
-            let lastError = null;
-            
-            for (const { name, lib } of libraries) {
+                const details = info.video_details;
+                
+                // Check if video is available
+                if (!details.title || details.title.includes('[Private video]') || details.title.includes('[Deleted video]')) {
+                    throw new Error('Video is private, deleted, or unavailable');
+                }
+
+                // Check duration (max 2 hours)
+                const duration = details.durationInSec || 0;
+                if (duration > 7200) {
+                    throw new Error('Video is too long (max 2 hours)');
+                }
+
+                // Check if live stream
+                if (details.live) {
+                    throw new Error('Live streams are not supported');
+                }
+
+                const result = {
+                    title: details.title,
+                    url: details.url || url,
+                    duration: this.formatDuration(duration),
+                    thumbnail: details.thumbnails?.[0]?.url || null,
+                    author: details.channel?.name || 'Unknown',
+                    views: this.formatViews(details.views),
+                    uploadDate: details.uploadedAt || 'Unknown',
+                    description: details.description?.substring(0, 200) || 'No description'
+                };
+
+                logger.success('Successfully fetched video info using play-dl', { 
+                    title: result.title, 
+                    author: result.author,
+                    duration: result.duration 
+                });
+
+                return result;
+                
+            } catch (playDlError) {
+                logger.warn('play-dl failed, trying ytdl-core:', playDlError.message);
+                
+                // Fallback to ytdl-core
                 try {
-                    logger.debug(`Trying ${name} library`);
-                    
-                    // Try to get video info with timeout
                     const info = await Promise.race([
-                        lib.getInfo(url),
+                        ytdl.getInfo(url),
                         new Promise((_, reject) => 
-                            setTimeout(() => reject(new Error(`${name} timeout`)), 15000)
+                            setTimeout(() => reject(new Error('ytdl-core timeout')), 15000)
                         )
                     ]);
 
-                    // Validate video details
-                    if (!info || !info.videoDetails) {
-                        throw new Error(`${name}: No video details found`);
-                    }
-
                     const videoDetails = info.videoDetails;
                     
-                    // Check if video is available
-                    if (!videoDetails.title || 
-                        videoDetails.title === '[Private video]' || 
+                    if (!videoDetails || !videoDetails.title) {
+                        throw new Error('No video details found');
+                    }
+
+                    // Check availability
+                    if (videoDetails.title === '[Private video]' || 
                         videoDetails.title === '[Deleted video]' ||
                         videoDetails.title.includes('Private') ||
                         videoDetails.title.includes('Deleted')) {
                         throw new Error('Video is private, deleted, or unavailable');
                     }
 
-                    // Check if video is too long (over 2 hours)
                     const duration = parseInt(videoDetails.lengthSeconds || 0);
                     if (duration > 7200) {
                         throw new Error('Video is too long (max 2 hours)');
                     }
 
-                    // Check if video is live stream
                     if (videoDetails.isLiveContent && videoDetails.isLive) {
                         throw new Error('Live streams are not supported');
                     }
@@ -267,27 +298,22 @@ class MusicManager {
                         author: videoDetails.author?.name || videoDetails.ownerChannelName || 'Unknown',
                         views: this.formatViews(videoDetails.viewCount),
                         uploadDate: videoDetails.uploadDate || 'Unknown',
-                        description: videoDetails.shortDescription?.substring(0, 200) || 'No description',
-                        ageRestricted: videoDetails.age_restricted || false
+                        description: videoDetails.shortDescription?.substring(0, 200) || 'No description'
                     };
 
-                    logger.success(`Successfully fetched video info using ${name}`, { 
+                    logger.success('Successfully fetched video info using ytdl-core', { 
                         title: result.title, 
                         author: result.author,
                         duration: result.duration 
                     });
 
                     return result;
-
-                } catch (error) {
-                    logger.warn(`${name} failed:`, error.message);
-                    lastError = error;
-                    continue; // Try next library
+                    
+                } catch (ytdlError) {
+                    logger.error('All libraries failed:', ytdlError.message);
+                    throw new Error('Unable to fetch video information from YouTube');
                 }
             }
-
-            // If all libraries failed, throw the last error
-            throw lastError || new Error('All YouTube libraries failed');
             
         } catch (error) {
             logger.error('Error getting video info:', error);
@@ -303,8 +329,6 @@ class MusicManager {
                 throw new Error('Live streams are not supported.');
             } else if (error.message.includes('format')) {
                 throw new Error('Invalid YouTube URL. Please provide a valid youtube.com or youtu.be link.');
-            } else if (error.message.includes('age')) {
-                throw new Error('Age-restricted videos are not supported.');
             } else {
                 throw new Error(`Unable to fetch video: ${error.message}`);
             }

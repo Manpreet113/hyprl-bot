@@ -33,22 +33,45 @@ module.exports = {
         await interaction.deferReply();
 
         try {
-            // Check if it's a YouTube URL
-            const url = query;
+            // Validate YouTube URL
+            let url = query;
             if (!query.includes('youtube.com') && !query.includes('youtu.be')) {
-                // For now, require YouTube URLs. Later we can add search functionality
                 return await interaction.editReply({
-                    content: '❌ Please provide a valid YouTube URL. Search functionality coming soon!'
+                    content: '❌ Please provide a valid YouTube URL. YouTube search functionality coming soon!'
                 });
             }
 
-            // Get video information
-            const songInfo = await musicManager.getVideoInfo(url);
+            // Normalize URL format
+            if (query.includes('youtu.be/')) {
+                const videoId = query.split('youtu.be/')[1].split('?')[0];
+                url = `https://www.youtube.com/watch?v=${videoId}`;
+            }
+
+            // Get video information with timeout
+            let songInfo;
+            try {
+                songInfo = await Promise.race([
+                    musicManager.getVideoInfo(url),
+                    new Promise((_, reject) => 
+                        setTimeout(() => reject(new Error('Request timeout after 30 seconds')), 30000)
+                    )
+                ]);
+            } catch (infoError) {
+                return await interaction.editReply({
+                    content: `❌ Failed to get video info: ${infoError.message}`
+                });
+            }
             
             // Join voice channel if not already connected
             const guildId = interaction.guild.id;
-            if (!musicManager.connections.has(guildId)) {
-                await musicManager.joinVoiceChannel(interaction.member.voice.channel);
+            try {
+                if (!musicManager.connections.has(guildId)) {
+                    await musicManager.joinVoiceChannel(interaction.member.voice.channel);
+                }
+            } catch (connectionError) {
+                return await interaction.editReply({
+                    content: `❌ Failed to join voice channel: ${connectionError.message}`
+                });
             }
 
             // Add to queue
@@ -58,22 +81,22 @@ module.exports = {
                 interaction.channel
             );
 
-            if (queuePosition === 0) {
+            if (queuePosition === 1) {
                 // Started playing immediately
                 await interaction.editReply({
-                    content: `🎵 Now playing **${songInfo.title}**`
+                    content: `🎵 Now playing **${songInfo.title}** by **${songInfo.author}**`
                 });
             } else {
                 // Added to queue
                 await interaction.editReply({
-                    content: `✅ Added **${songInfo.title}** to queue at position ${queuePosition}`
+                    content: `✅ Added **${songInfo.title}** to queue at position **${queuePosition}**`
                 });
             }
 
         } catch (error) {
             console.error('Error in play command:', error);
             await interaction.editReply({
-                content: `❌ Error playing music: ${error.message}`
+                content: `❌ Error playing music: ${error.message}\n\nPlease try again with a different YouTube URL.`
             });
         }
     },
