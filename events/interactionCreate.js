@@ -7,16 +7,14 @@ module.exports = {
     name: 'interactionCreate',
     async execute(interaction) {
         console.log(`[DEBUG] New interaction received: ${interaction.type} | Command: ${interaction.commandName}`);
-        // Ensure user and guild are in the database before anything else
-        try {
-            if (interaction.guild) {
-                await db.createOrUpdateGuild(interaction.guild.id, interaction.guild.name);
-            }
-            await db.createOrUpdateUser(interaction.user.id, interaction.user.username, interaction.user.discriminator);
-        } catch (dbError) {
-            logger.error('Failed to update guild/user in DB on interaction', { error: dbError });
-            // Decide if you want to stop execution if the DB fails. For now, we'll let it continue.
+        
+        // Fire-and-forget database updates to avoid blocking the interaction response
+        if (interaction.guild) {
+            db.createOrUpdateGuild(interaction.guild.id, interaction.guild.name)
+                .catch(dbError => logger.error('Background guild update failed', { error: dbError }));
         }
+        db.createOrUpdateUser(interaction.user.id, interaction.user.username, interaction.user.discriminator)
+            .catch(dbError => logger.error('Background user update failed', { error: dbError }));
 
         try {
             // Handle slash commands
@@ -27,8 +25,12 @@ module.exports = {
                     return;
                 }
                 await command.execute(interaction);
-                await db.logCommand(interaction.commandName, interaction.user.id, interaction.guildId, null, true);
-                await db.incrementUserCommands(interaction.user.id);
+                
+                // Fire-and-forget logging
+                db.logCommand(interaction.commandName, interaction.user.id, interaction.guildId, null, true)
+                    .catch(e => logger.error('Failed to log command success', {error: e}));
+                db.incrementUserCommands(interaction.user.id)
+                    .catch(e => logger.error('Failed to increment user commands', {error: e}));
             }
             // Handle button interactions
             else if (interaction.isButton()) {
@@ -50,9 +52,10 @@ module.exports = {
                 }
             }
         } catch (error) {
-            // Log failed command execution
+            // Log failed command execution (fire-and-forget)
             if (interaction.isChatInputCommand()) {
-                await db.logCommand(interaction.commandName, interaction.user.id, interaction.guildId, null, false);
+                db.logCommand(interaction.commandName, interaction.user.id, interaction.guildId, null, false)
+                    .catch(e => logger.error('Failed to log command failure', {error: e}));
             }
             // Use the central error handler
             await errorHandler.handleCommandError(error, interaction);

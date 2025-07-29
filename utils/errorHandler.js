@@ -74,7 +74,7 @@ class ErrorHandler {
             if (interaction.replied || interaction.deferred) {
                 await interaction.editReply({ embeds: [errorEmbed], components: [] });
             } else {
-                await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
+                await interaction.reply({ embeds: [errorEmbed], flags: MessageFlags.Ephemeral });
             }
         } catch (replyError) {
             logger.error('Failed to send primary error reply', { 
@@ -85,7 +85,7 @@ class ErrorHandler {
             
             // Fallback to a follow-up message if the initial reply/edit fails
             try {
-                await interaction.followUp({ embeds: [errorEmbed], ephemeral: true });
+                await interaction.followUp({ embeds: [errorEmbed], flags: MessageFlags.Ephemeral });
             } catch (followUpError) {
                 logger.error('Failed to send follow-up error reply', {
                     errorId,
