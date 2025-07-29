@@ -71,16 +71,27 @@ class ErrorHandler {
             .setTimestamp();
 
         try {
-            if (interaction.deferred || interaction.replied) {
-                await interaction.editReply({ embeds: [errorEmbed] });
+            if (interaction.replied || interaction.deferred) {
+                await interaction.editReply({ embeds: [errorEmbed], components: [] });
             } else {
-                await interaction.reply({ embeds: [errorEmbed], flags: MessageFlags.Ephemeral });
+                await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
             }
         } catch (replyError) {
-            logger.error('Failed to send error message to user', { 
+            logger.error('Failed to send primary error reply', { 
+                errorId,
                 originalError: error.message,
                 replyError: replyError.message 
             });
+            
+            // Fallback to a follow-up message if the initial reply/edit fails
+            try {
+                await interaction.followUp({ embeds: [errorEmbed], ephemeral: true });
+            } catch (followUpError) {
+                logger.error('Failed to send follow-up error reply', {
+                    errorId,
+                    followUpError: followUpError.message
+                });
+            }
         }
 
         // Send detailed error to webhook/channel
